@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="horizontal"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <ImageView
+            android:layout_width="30dp"
+            android:layout_height="22dp"
+            android:id="@+id/imageIcon" android:layout_gravity="center|left|top" android:src="@drawable/folder"
+            android:layout_margin="5dp"/>
+    <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text=".."
+            android:id="@+id/lblFolderName" android:layout_gravity="center|left|top"
+            android:textColor="#335d9d" android:textSize="7pt" android:layout_margin="5dp"/>
+</LinearLayout>

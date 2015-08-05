@@ -1,23 +1,20 @@
 package hu.sektor.bible;
 
 import android.app.Activity;
+import android.content.ContentValues;
+import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.content.Context;
-import android.os.Build;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
-import android.widget.ArrayAdapter;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import hu.sektor.bible.database.DbManager;
 import hu.sektor.bible.database.Translation;
@@ -27,6 +24,7 @@ public class MainActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
     private DbManager dbManager;
+    private static int REQUEST_LOAD_DATABASE = 0x100;
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -41,17 +39,31 @@ public class MainActivity extends ActionBarActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
+        DbManager.context = this;
+
+        //initDb();
+
+
+
+        //dbManager.getDb().execSQL("DROP TABLE \"" + Translation.TABLE_NAME + "\"" );
+
+        /*if(dbManager.getTranslations(true).size() == 0) {
+            dbManager.insertTranslation(new Translation(1, "Szent István Társulati Biblia", "SZIT"));
+            dbManager.insertTranslation(new Translation(2, "Magyar Bibliatársulat újfordítású Bibliája", "UF"));
+            dbManager.insertTranslation(new Translation(3, "Káldi-Neovulgáta", "KNB"));
+            dbManager.insertTranslation(new Translation(4, "Károli Gáspár revideált fordítása", "KG"));
+            dbManager.insertTranslation(new Translation(5, "Békés-Dalos Újszövetségi Szentírás", "BD"));
+            //dbManager.close();
+        }*/
+
         setContentView(R.layout.activity_main);
 
-        if(dbManager == null){
-            dbManager = new DbManager(this);
-        }
 
-        /*dbManager.insertTranslation(new Translation(1, "Szent István Társulati Biblia", "SZIT"));
-        dbManager.insertTranslation(new Translation(2, "Magyar Bibliatársulat újfordítású Bibliája", "UF"));
-        dbManager.insertTranslation(new Translation(3, "Káldi-Neovulgáta", "KNB"));
-        dbManager.insertTranslation(new Translation(4, "Károli Gáspár revideált fordítása", "KG"));
-        dbManager.insertTranslation(new Translation(5, "Békés-Dalos Újszövetségi Szentírás", "BD"));*/
+
+
+
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
@@ -61,7 +73,65 @@ public class MainActivity extends ActionBarActivity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
+
+        //if(dbManager.getTranslations(true).size() == 0){
+            startActivityForResult(new Intent(this, LoadDatabaseActivity.class),REQUEST_LOAD_DATABASE);
+        //}
+
+        /*Translation translation = new Translation(1, "Szent István Társulati Biblia", "SZIT");
+
+        dbManager = new DbManager(this);
+
+        //System.out.println("DBINFO: " + dbManager.getWritableDatabase().hashCode() + ", " + dbManager.getReadableDatabase().hashCode() + ", " + dbManager.getWritableDatabase().hashCode());
+        System.out.println("RW_EQUAL: " + (dbManager.getWritableDatabase() == dbManager.getReadableDatabase()));
+
+        SQLiteDatabase db = dbManager.getWritableDatabase();
+        db.beginTransaction();
+
+        //dbManager.onCreate(db);
+        ContentValues values = new ContentValues();
+
+        values.put(Translation.COL_ID, translation.getId());
+        values.put(Translation.COL_NAME, translation.getName());
+        values.put(Translation.COL_ABBREV, translation.getAbbreviation());
+
+        db.insert(Translation.TABLE_NAME, null, values);
+
+        db.setTransactionSuccessful();
+
+        db.endTransaction();
+
+        dbManager.getWritableDatabase().setLockingEnabled(false);
+        dbManager.getWritableDatabase().close();
+
+        ///2
+
+        dbManager = new DbManager(this);
+
+        db = dbManager.getWritableDatabase();
+        db.beginTransaction();
+
+        //dbManager.onCreate(db);
+        values = new ContentValues();
+
+        values.put(Translation.COL_ID, translation.getId());
+        values.put(Translation.COL_NAME, translation.getName());
+        values.put(Translation.COL_ABBREV, translation.getAbbreviation());
+
+        db.insert(Translation.TABLE_NAME, null, values);
+
+        db.setTransactionSuccessful();
+
+        db.endTransaction();
+
+        dbManager.close();*/
     }
+
+    /*private void initDb(){
+        if(dbManager == null){
+            dbManager = DbManager.getInstance(this);
+        }
+    }*/
 
     @Override
     public void onNavigationDrawerItemSelected(int position) {
@@ -73,7 +143,16 @@ public class MainActivity extends ActionBarActivity
     }
 
     public void onSectionAttached(int number) {
-        mTitle = dbManager.getTranslations().get(number-1).getName();
+        /*List<Translation> translations = dbManager.getTranslations();
+
+        if(translations.size() > 0) {
+            mTitle = translations.get(number - 1).getName();
+        }
+        else{
+            mTitle = "No translation (Line: 93)";
+        }*/
+
+        mTitle = "No translation (Line: 105)";
     }
 
     public void restoreActionBar() {
@@ -113,10 +192,7 @@ public class MainActivity extends ActionBarActivity
     }
 
     public DbManager getDbManager() {
-        if(dbManager == null){
-            dbManager = new DbManager(this);
-        }
-
+        //initDb();
         return dbManager;
     }
 
@@ -139,6 +215,7 @@ public class MainActivity extends ActionBarActivity
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
             fragment.setArguments(args);
+
             return fragment;
         }
 
@@ -149,6 +226,12 @@ public class MainActivity extends ActionBarActivity
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+            rootView.findViewById(R.id.btnTest).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    System.out.println("TDB: " + ((MainActivity) getActivity()).dbManager.getTranslations(true).size());
+                }
+            });
             return rootView;
         }
 
